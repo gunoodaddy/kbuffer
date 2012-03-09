@@ -1,54 +1,55 @@
-# strkeymap
-strkeymap is string key map written by c language.
-
-## Usage
-
-just include "strkeymap.h" in your source or header files.
-
-(you are responsible for freeing your own value in this map.)
-
+# kbuffer
+kbuffer is a general buffer written by c language.
 
 ## Examples
 
 	#include <stdio.h>
-	#include "strkeymap.h"                                                                                            
-					 
-	int main() {
-		strkeymap *map;
-		map = strkeymap_new();
-	 
-		strkeymap_insert(map, "1", (void *)1);
-		strkeymap_insert(map, "1", (void *)11);
-		strkeymap_insert(map, "2", (void *)2);
-		strkeymap_insert(map, "3", (void *)3);
-		strkeymap_insert(map, "4", (void *)4);
-		strkeymap_insert(map, "5", (void *)5);
-		strkeymap_insert(map, "6", (void *)6);
-		strkeymap_insert(map, "7", (void *)7);
-		strkeymap_iterator it = strkeymap_find(map, "7");
-		printf("strkeymap_find : %s : %p\n", it.first, it.second);
-	 
-		if(1) {
-			const strkeymap_iterator* it = strkeymap_iterator_new(map);
-			if(it) {
-				do {
-					printf("[ITER-%s:%p] => ", it->first, it->second);
-					it = strkeymap_iterator_next(it);
-				} while(it);
-				printf("\n");
-			}
-			strkeymap_iterator_free(map);
+	#include <assert.h>
+	#include <memory.h>
+	#include "kbuffer.h"
+
+	int main(int argc, char **argv) {
+
+		// # test case 1
+		{
+			kbuffer *buf = kbuffer_new();
+			size_t i = 0;
+			for(i = 0; i < 10; i++)
+				kbuffer_add(buf, "data", 4);
+			assert(kbuffer_get_size(buf) == 4 * 10);
+			kbuffer_free(buf);
 		}
-	 
-		if(1) {
-			strkeymap_erase(map, "1");
-			strkeymap_erase(map, "2");
-			strkeymap_erase(map, "3");
-			strkeymap_erase(map, "4");
+
+		// # test case 2
+		{
+			kbuffer *buf = kbuffer_new();
+			kbuffer_add(buf, "abc", 3);
+			kbuffer_add(buf, "def", 3);
+
+			int len = 0;
+			const char *str;
+			str = (const char *)kbuffer_get_contiguous_data(buf, &len);
+			assert(strncmp(str, "abc", 3) == 0 && len == 3);
+
+			kbuffer_drain(buf, 3);
+			str = (const char *)kbuffer_get_contiguous_data(buf, &len);
+			assert(strncmp(str, "def", 3) == 0 && len == 3);
+			kbuffer_free(buf);
 		}
-	 
-		strkeymap_free(map);
-	 
-		printf("bye!\n");
+
+		// # test case 3
+		{
+			kbuffer *buf = kbuffer_new();
+			kbuffer_add_printf(buf, "abc%d", 3);
+
+			int len = 0;
+			const char *str;
+			str = (const char *)kbuffer_get_contiguous_data(buf, &len);
+			assert(strncmp(str, "abc3", 4) == 0 && len == 4);
+			kbuffer_free(buf);
+		}
+
+		printf("unit test ok!\n");
+		return 0;
 	}
 

@@ -1,7 +1,7 @@
 # kbuffer
 kbuffer is a general buffer written by c language.
 
-## kbuffer api list 
+## API List
 
 	kbuffer * kbuffer_new()
 	
